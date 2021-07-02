@@ -113,7 +113,7 @@ int main() {
 
     strcpy(sender, "sashakulinich11@gmail.com");
     //strcpy(receiver, "anyhost@localhost.com"); // works fine!
-    strcpy(receiver, "okulinich131@gmail.com");
+    strcpy(receiver, "okulinich131@localhost.com");
     strcpy(text, "Sent by my new function");
 
     send_mail_smtp(sender, receiver, text);
