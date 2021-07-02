@@ -1,4 +1,5 @@
 #include "SimpleClient.hpp"
+#include "../logger/logger.hpp"
 
 SimpleClient::SimpleClient(const std::string &senderEmail, const std::string &receiverEmail, const std::string &mailText)
 : sender(senderEmail), receiver(receiverEmail), text(mailText)
@@ -41,16 +42,16 @@ bool SimpleClient::trySend()
     {
         try
         {
-            std::cerr << "Command: " << cmd << '\n';
+            LOG_DEBUG << "Command: " << cmd;
             sendSmtpCommand(socketDesc, cmd.c_str(), response);
         }
         catch(const std::string &eStr)
         {
-            std::cerr << "Exception from sendSmtpCommand(): " << eStr << '\n'; // write to file!
-            std::cerr << "Possible reason: " << lastError << '\n';
+            LOG_ERROR << "Exception from sendSmtpCommand(): " << eStr;
+            LOG_ERROR << "Possible reason: " << lastError;
             return false;
         }
-        std::cerr << "Response: " << response << '\n';
+        LOG_DEBUG << "Response: " << response;
     }
     return true;
 }
@@ -64,12 +65,12 @@ void SimpleClient::sendMail()
     }
     catch(const std::string &eStr)
     {
-        std::cerr << "Exception in sendMail(): " << eStr << '\n'; // write to file!
-        std::cerr << "Possible reason: " << lastError << '\n';
-        std::cout << "Failed to send the message!" << std::endl;
+        LOG_ERROR << "Exception in sendMail(): " << eStr;
+        LOG_ERROR << "Possible reason: " << lastError;
+        LOG_INFO << "Failed to send the message!";
         return ;
     }
-    std::cout << "The message was successfully sent" << std::endl;
+    LOG_INFO << "The message was successfully sent";
 }
 
 void SimpleClient::establishConnection()
@@ -82,12 +83,11 @@ void SimpleClient::establishConnection()
 
     // check mail format first (forbidden symbols, etc)
 
-    printf("Getting host by name\n"); // debug
+    LOG_DEBUG << "Getting host by name";
     hostName = receiver.substr(receiver.find_first_of('@') + 1);
-    //strcpy(hostName, strchr(receiver, '@') + 1);
     hostaddr = gethostbyname(hostName.c_str());
     if (!hostaddr) {
-        // fprintf(stderr, "Gethostbyname failed: %s\n", hostName); debug message here
+        LOG_DEBUG << "Gethostbyname failed: " << hostName;
         lastError = strerror(errno);
         throw "Gethostbyname failed";
     }
@@ -97,14 +97,14 @@ void SimpleClient::establishConnection()
     peer.sin_port = htons(RECEIVER_PORT);
     peer.sin_addr.s_addr = *((unsigned long *)hostaddr->h_addr);
 
+    LOG_DEBUG << "Creating socket";
     socketDesc = socket(AF_INET, SOCK_STREAM, 0);
     if (socketDesc < 0) {
         lastError = strerror(errno);
         throw "Failed to create a socket";
     }
 
-    printf("Connecting to host\n"); // debug: hangs here
-    //int rc = connect(socketDesc, (struct sockaddr * )&peer, sizeof(peer));
+    LOG_DEBUG << "Connecting to host";
     if (connect(socketDesc, (struct sockaddr * )&peer, sizeof(peer))) {
         lastError = strerror(errno);
         throw "Error connecting to peer";
