@@ -3,7 +3,7 @@
 #include <iostream>
 #include <sstream>
 
-enum loglevel_e { logERROR, logWARNING, logINFO, logDEBUG };
+enum loglevel_e { logDEBUG, logINFO, logWARNING, logERROR };
 
 class SimpleLogger
 {
@@ -47,7 +47,17 @@ private:
     std::ostringstream _buffer;
 };
 
-#define LOG_ERROR SimpleLogger(logERROR)
-#define LOG_WARNING SimpleLogger(logWARNING)
-#define LOG_INFO SimpleLogger(logINFO)
-#define LOG_DEBUG SimpleLogger(logDEBUG)
+extern loglevel_e loglevel;
+
+#define LOG_ERROR \
+if (loglevel > logERROR) ; \
+else SimpleLogger(logERROR)
+#define LOG_WARNING \
+if (loglevel > logWARNING) ; \
+else SimpleLogger(logWARNING)
+#define LOG_INFO \
+if (loglevel > logINFO) ; \
+else SimpleLogger(logINFO)
+#define LOG_DEBUG \
+if (loglevel > logDEBUG) ; \
+else SimpleLogger(logDEBUG)

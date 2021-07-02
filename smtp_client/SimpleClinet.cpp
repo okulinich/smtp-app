@@ -1,6 +1,8 @@
 #include "SimpleClient.hpp"
 #include "../logger/logger.hpp"
 
+loglevel_e loglevel = logINFO;
+
 SimpleClient::SimpleClient(const std::string &senderEmail, const std::string &receiverEmail, const std::string &mailText)
 : sender(senderEmail), receiver(receiverEmail), text(mailText)
 {
